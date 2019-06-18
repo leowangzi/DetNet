@@ -27,7 +27,8 @@ from roi_data_layer.roibatchLoader import roibatchLoader
 from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.rpn.bbox_transform import clip_boxes
 # from model.nms.nms_wrapper import nms, soft_nms
-from model.roi_layers.nms import nms  #, soft_nms
+# from model.roi_layers.nms import nms  #, soft_nms
+from torchvision.ops import nms
 from model.rpn.bbox_transform import bbox_transform_inv
 from model.utils.net_utils import vis_detections
 from model.fpn.detnet_backbone import detnet
@@ -295,15 +296,15 @@ if __name__ == '__main__':
 
                 cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
                 cls_dets = cls_dets[order]
-                if args.soft_nms:
-                    np_dets = cls_dets.cpu().numpy().astype(np.float32)
-                    keep = soft_nms(np_dets, method=cfg.TEST.SOFT_NMS_METHOD)  # np_dets will be changed
-                    keep = torch.from_numpy(keep).type_as(cls_dets).int()
-                    cls_dets = torch.from_numpy(np_dets).type_as(cls_dets)
-                else:
+                # if args.soft_nms:
+                #     np_dets = cls_dets.cpu().numpy().astype(np.float32)
+                #     keep = soft_nms(np_dets, method=cfg.TEST.SOFT_NMS_METHOD)  # np_dets will be changed
+                #     keep = torch.from_numpy(keep).type_as(cls_dets).int()
+                #     cls_dets = torch.from_numpy(np_dets).type_as(cls_dets)
+                # else:
                     # keep = nms(cls_dets, cfg.TEST.NMS)
                     # keep = nms(cls_boxes[order, :], cls_scores.unsqueeze(1)[order], cfg.TEST.NMS)
-                    keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
+                keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
                 cls_dets = cls_dets[keep.view(-1).long()]
                 if vis:
                     im2show = vis_detections(im2show, imdb.classes[j], cls_dets.cpu().numpy(), 0.3)
