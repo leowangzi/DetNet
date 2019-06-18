@@ -26,8 +26,7 @@ from roi_data_layer.roidb import combined_roidb
 from roi_data_layer.roibatchLoader import roibatchLoader
 from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.rpn.bbox_transform import clip_boxes
-# from model.nms.nms_wrapper import nms, soft_nms
-# from model.roi_layers.nms import nms  #, soft_nms
+
 from torchvision.ops import nms
 from model.rpn.bbox_transform import bbox_transform_inv
 from model.utils.net_utils import vis_detections
@@ -241,14 +240,12 @@ if __name__ == '__main__':
             im_info.resize_(data[1].size()).copy_(data[1])
             gt_boxes.resize_(data[2].size()).copy_(data[2])
             num_boxes.resize_(data[3].size()).copy_(data[3])
-        # im_data.data.resize_(data[0].size()).copy_(data[0])
-        # im_info.data.resize_(data[1].size()).copy_(data[1])
-        # gt_boxes.data.resize_(data[2].size()).copy_(data[2])
-        # num_boxes.data.resize_(data[3].size()).copy_(data[3])
 
         det_tic = time.time()
-        rois, cls_prob, bbox_pred, \
-        _, _, _, _, _ = fpn(im_data, im_info, gt_boxes, num_boxes)
+
+        with torch.no_grad():
+            rois, cls_prob, bbox_pred, \
+            _, _, _, _, _ = fpn(im_data, im_info, gt_boxes, num_boxes)
 
         scores = cls_prob.data
         boxes = rois.data[:, :, 1:5]
