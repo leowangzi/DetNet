@@ -17,6 +17,8 @@ from model.rpn.proposal_target_layer import _ProposalTargetLayer
 from model.utils.net_utils import _smooth_l1_loss, _crop_pool_layer, _affine_grid_gen, _affine_theta
 import time
 import pdb
+
+
 def log2(x):
     """Implementatin of Log2. Pytorch doesn't have a native implemenation."""
     ln2 = Variable(torch.log(torch.FloatTensor([2.0])), requires_grad=False)
@@ -43,8 +45,8 @@ class _FPN(nn.Module):
         # computation time, we first use 14 as the pool_size, and then do stride=2 pooling for cls branch.
         # self.RCNN_roi_pool = _RoIPooling(cfg.POOLING_SIZE, cfg.POOLING_SIZE, 1.0/16.0)
         # self.RCNN_roi_align = RoIAlignAvg(cfg.POOLING_SIZE, cfg.POOLING_SIZE, 1.0/16.0)
-        self.RCNN_roi_pool = ROIPool((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0)
-        self.RCNN_roi_align = ROIAlign((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0, 0)
+        # self.RCNN_roi_pool = ROIPool((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0)
+        # self.RCNN_roi_align = ROIAlign((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0, 0)
         # self.grid_size = cfg.POOLING_SIZE * 2 if cfg.CROP_RESIZE_WITH_MAX_POOL else cfg.POOLING_SIZE
         # self.RCNN_roi_crop = _RoICrop()
 
@@ -152,7 +154,8 @@ class _FPN(nn.Module):
                 # exit(1)
                 box_to_levels.append(idx_l)
                 scale = feat_maps[i].size(2) / im_info[0][0]
-                feat = self.RCNN_roi_align(feat_maps[i], rois[idx_l], scale)
+                # feat = self.RCNN_roi_align(feat_maps[i], rois[idx_l], scale)
+                feat = self._roi_align_layer(feat_maps[i], rois[idx_l], scale)
                 roi_pool_feats.append(feat)
             roi_pool_feat = torch.cat(roi_pool_feats, 0)
             box_to_level = torch.cat(box_to_levels, 0)
@@ -168,7 +171,8 @@ class _FPN(nn.Module):
                 idx_l = (roi_level == l).nonzero().squeeze()
                 box_to_levels.append(idx_l)
                 scale = feat_maps[i].size(2) / im_info[0][0]
-                feat = self.RCNN_roi_pool(feat_maps[i], rois[idx_l], scale)
+                # feat = self.RCNN_roi_pool(feat_maps[i], rois[idx_l], scale)
+                feat = self._roi_pool_layer(feat_maps[i], rois[idx_l], scale)
                 roi_pool_feats.append(feat)
             roi_pool_feat = torch.cat(roi_pool_feats, 0)
             box_to_level = torch.cat(box_to_levels, 0)
@@ -177,6 +181,12 @@ class _FPN(nn.Module):
             
         return roi_pool_feat
 
+    def _roi_pool_layer(self, bottom, rois, scale):
+        return RoIPool((cfg.POOLING_SIZE, cfg.POOLING_SIZE), scale)(bottom, rois)
+
+    def _roi_align_layer(self, bottom, rois, scale):
+        return RoIAlign((cfg.POOLING_SIZE, cfg.POOLING_SIZE), scale, 0)(bottom, rois)
+    
     def forward(self, im_data, im_info, gt_boxes, num_boxes):
         batch_size = im_data.size(0)
 
