@@ -4,6 +4,8 @@ pytorch-1.1 torchvision-0.3
 ### References
 
 - https://github.com/guoruoqian/DetNet_pytorch
+- https://github.com/jwyang/fpn.pytorch
+- https://github.com/jwyang/faster-rcnn.pytorch/tree/pytorch-1.0
 
 
 ### Prerequisites
