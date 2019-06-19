@@ -34,7 +34,7 @@ from model.utils.net_utils import weights_normal_init, save_net, load_net, \
     adjust_learning_rate, save_checkpoint, clip_gradient
 import cv2
 from model.fpn.detnet_backbone import detnet
-# from tensorboardX import SummaryWriter
+from tensorboardX import SummaryWriter
 from model.utils.summary import *
 import pdb
 
@@ -171,11 +171,11 @@ if __name__ == '__main__':
     print('Called with args:')
     print(args)
 
-    # if args.use_tfboard:
+    if args.use_tfboard:
         # from model.utils.logger import Logger
         # # Set the logger
         # logger = Logger('./logs')
-        # writer = SummaryWriter(comment=args.exp_name)
+        writer = SummaryWriter(comment=args.exp_name)
 
     # logging.basicConfig(filename="logs/"+args.net+"_"+args.dataset+"_"+str(args.session)+".log",
     #       filemode='w', level=logging.DEBUG)
@@ -341,16 +341,6 @@ if __name__ == '__main__':
 
     iters_per_epoch = int(train_size / args.batch_size)
 
-
-    # from visdom import Visdom
-    # import numpy as np
-    # viz = Visdom(env='NICENET')
-    # line = viz.line(np.arange(10))
-    vi_eopch = []
-    vi_loss_val = []
-    vi_loss_train = []
-    count = 0
-
     for epoch in range(args.start_epoch, args.max_epochs):
         # setting to train mode
         FPN.train()
@@ -365,10 +355,7 @@ if __name__ == '__main__':
 
         for step in range(iters_per_epoch):
             data = data_iter.next()
-            # im_data.data.resize_(data[0].size()).copy_(data[0])
-            # im_info.data.resize_(data[1].size()).copy_(data[1])
-            # gt_boxes.data.resize_(data[2].size()).copy_(data[2])
-            # num_boxes.data.resize_(data[3].size()).copy_(data[3])
+
             with torch.no_grad():
                 im_data.resize_(data[0].size()).copy_(data[0])
                 im_info.resize_(data[1].size()).copy_(data[1])
@@ -416,25 +403,7 @@ if __name__ == '__main__':
                     loss_rcnn_box = RCNN_loss_bbox.item()
                     fg_cnt = torch.sum(roi_labels.data.ne(0))
                     bg_cnt = roi_labels.data.numel() - fg_cnt
-
                 
-                vi_eopch.append(count)
-                vi_loss_train.append(loss_temp) if loss_temp < 2. else vi_loss_train.append(2.)
-                vi_loss_val.append(0)
-
-                # viz.line(
-                #     X=np.column_stack((np.array(vi_eopch), np.array(vi_eopch))),
-                #     Y=np.column_stack((np.array(vi_loss_train), np.array(vi_loss_val))),
-                #     win=line,
-                #     opts=dict(legend=["train_loss", "valid_loss"])
-                #     )
-                count += 1
-                
-                # _print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" \
-                #        % (args.session, epoch, step, iters_per_epoch, loss_temp, lr), )
-                # _print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end - start), )
-                # _print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" \
-                #        % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box), )
                 _print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e rpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" \
                        % (args.session, epoch, step, iters_per_epoch, loss_temp, lr, loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box), )
                 if args.use_tfboard:
@@ -449,7 +418,7 @@ if __name__ == '__main__':
                     #     logger.scalar_summary(tag, value, step)
                     scalars = [loss_temp, loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box]
                     names = ['loss', 'loss_rpn_cls', 'loss_rpn_box', 'loss_rcnn_cls', 'loss_rcnn_box']
-                    # write_scalars(writer, scalars, names, iters_per_epoch * (epoch - 1) + step, tag='train_loss')
+                    write_scalars(writer, scalars, names, iters_per_epoch * (epoch - 1) + step, tag='train_loss')
 
                 loss_temp = 0
                 start = time.time()
