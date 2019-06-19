@@ -44,12 +44,12 @@ I benchmark this code thoroughly on pascal voc2007 and 07+12. Below are the resu
 
 1). PASCAL VOC 2007 (Train/Test: 07trainval/07test, scale=600, ROI Align)
 
-| model（FPN）                                                 | GPUs            | Batch Size | lr   | lr_decay | max_epoch | Speed/epoch | Memory/GPU | mAP  |
+| model（FPN）                                                 | Batch Size | lr   | lr_decay | max_epoch | Speed/epoch | Memory/GPU | mAP  |
 | ------------------------------------------------------------ | --------------- | ---------- | ---- | -------- | --------- | ----------- | ---------- | ---- |
-| DetNet59 | 1 GTX 1080 (Ti) | 2          | 1e-3 | 10       | 12        | 1.07hr      | 5412MB     | 75.4 |
+| DetNet59 | 2          | 1e-3 | 10       | 12        | 1.07hr      | 5412MB     | 75.4 |
 
 2). PASCAL VOC 07+12 (Train/Test: 07+12trainval/07test, scale=600, ROI Align)
 
-| model（FPN）                                                 | GPUs            | Batch Size | lr   | lr_decay | max_epoch | Speed/epoch | Memory/GPU | mAP  |
+| model（FPN）                                                 | Batch Size | lr   | lr_decay | max_epoch | Speed/epoch | Memory/GPU | mAP  |
 | ------------------------------------------------------------ | --------------- | ---------- | ---- | -------- | --------- | ----------- | ---------- | ---- |
-| DetNet59 | 1 GTX 1080 (Ti) | 1          | 1e-3 | 10       | 12        | 2.33hr      | 8015MB     | 81.5 |
+| DetNet59 | 1          | 1e-3 | 10       | 12        | 2.33hr      | 8015MB     | 81.5 |
